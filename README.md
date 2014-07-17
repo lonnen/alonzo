@@ -6,6 +6,10 @@ A [Scheme](http://www.schemers.org/Documents/Standards/R5RS/HTML/) interpreter w
 getting started
 ===============
 
+Hack on `alonzo.hs` until you're happy.
+
+To build:
 ```
 cabal install -j
+./dist/build/alonzo/alonzo <src-string>
 ```
