@@ -1,0 +1,23 @@
+name:                alonzo
+version:             0.0.0.1
+synopsis:            a Scheme interpreter written in Haskell
+-- description:
+homepage:            xor.lonnen.com/alonzo
+license:             MPL-2
+license-file:        LICENSE
+author:              lonnen
+maintainer:          @lonnen
+-- copyright:
+category:            Interpreter
+build-type:          Simple
+cabal-version:       >=1.8
+
+source-repository head
+  type:     git
+  location: https://github.com/lonnen/alonzo.git
+
+executable alonzo
+  main-is:             alonzo.hs
+  -- other-modules:
+  build-depends:       base   >=4.0 && < 5,
+                       parsec ==3.1.3
