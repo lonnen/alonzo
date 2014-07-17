@@ -1,17 +1,18 @@
 module Main where
+import Control.Monad
 import System.Environment
 import Text.ParserCombinators.Parsec hiding (spaces)
 
 main :: IO ()
-main = getArgs >>= putStrLn . readExpr . (!! 0)
+main =  getArgs >>= putStrLn . readExpr . (!! 0)
+
 
 symbol :: Parser Char
 symbol = oneOf "!$%&|*+-/:<=?>@^_~#"
 
-readExpr :: String -> String
 readExpr input = case parse parseExpr "lisp" input of
     Left err -> "No match: " ++ show err
-    Right val -> "Found value"
+    Right val -> "Found val"
 
 spaces :: Parser ()
 spaces = skipMany1 space
@@ -41,17 +42,26 @@ parseAtom = do first <- letter <|> symbol
 parseNumber :: Parser LispVal
 parseNumber = liftM (Number . read) $ many1 digit
 
--- equivalent functions:
+parseList :: Parser LispVal
+parseList = liftM List $ sepBy parseExpr spaces
 
--- parseNumber = do first <- many1 digit
---                 let d = read first
---                 return $ Number d
+parseDottedList :: Parser LispVal
+parseDottedList = do
+    head <- endBy parseExpr spaces
+    tail <- char '.' >> spaces >> parseExpr
+    return $ DottedList head tail
 
--- parseNumber =
---     many1 digit >>= \first -> let d = read first in return $ Number d
-
+parseQuoted :: Parser LispVal
+parseQuoted = do
+    char '\''
+    x <- parseExpr
+    return $ List [Atom "quote", x]
 
 parseExpr :: Parser LispVal
 parseExpr = parseAtom
         <|> parseString
         <|> parseNumber
+        <|> parseQuoted
+        <|> do char '('
+               x <- (try parseList) <|> parseDottedList
+               return x
