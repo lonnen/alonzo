@@ -3,7 +3,7 @@ version:             0.0.0.1
 synopsis:            a Scheme interpreter written in Haskell
 -- description:
 homepage:            xor.lonnen.com/alonzo
-license:             MPL-2
+license:             OtherLicense
 license-file:        LICENSE
 author:              lonnen
 maintainer:          @lonnen
@@ -20,4 +20,5 @@ executable alonzo
   main-is:             alonzo.hs
   -- other-modules:
   build-depends:       base   >=4.0 && < 5,
-                       parsec ==3.1.3
+                       parsec ==3.1.3,
+                       mtl
