@@ -10,13 +10,15 @@ maintainer:          @lonnen
 -- copyright:
 category:            Interpreter
 build-type:          Simple
-cabal-version:       >=1.8
+cabal-version:       >=1.10
 
 source-repository head
   type:     git
   location: https://github.com/lonnen/alonzo.git
 
 executable alonzo
+  default-language:    Haskell98
+  default-extensions:  ExistentialQuantification
   main-is:             alonzo.hs
   -- other-modules:
   build-depends:       base   >=4.0 && < 5,
