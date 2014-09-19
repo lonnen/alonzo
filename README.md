@@ -11,5 +11,5 @@ Hack on `alonzo.hs` until you're happy.
 To build:
 ```
 cabal install -j
-./dist/build/alonzo/alonzo <src-string>
+./dist/build/alonzo/alonzo <optional: filename>
 ```
