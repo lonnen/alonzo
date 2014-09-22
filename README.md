@@ -13,3 +13,24 @@ To build:
 cabal install -j
 ./dist/build/alonzo/alonzo <optional: filename>
 ```
+
+what's it got?
+==============
+
+* functions
+* lambdas
+* lexical scope
+* symbols
+* strings
+* integers
+* list manipulation
+* assignment
+* REPL
+* script files
+
+what's it missing?
+==================
+* hygenic macros
+* continuations
+* test suite
+* compliance tests
