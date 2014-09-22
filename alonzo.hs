@@ -4,6 +4,7 @@ import Control.Monad
 import Control.Monad.Error
 import System.Environment
 import Data.IORef
+import Numeric
 import Text.ParserCombinators.Parsec hiding (spaces)
 import System.IO hiding (try)
 
@@ -66,8 +67,46 @@ parseAtom = do first <- letter <|> symbol
                           "#f" -> Bool False
                           otherwise -> Atom atom
 
+parseBool :: Parser LispVal
+parseBool = do string "#"
+               x <- oneOf "tf"
+               return $ case x of
+                          't' -> Bool True
+                          'f' -> Bool False
+
 parseNumber :: Parser LispVal
-parseNumber = liftM (Number . read) $ many1 digit
+parseNumber = do num <- parseDigital1 <|> parseDigital2 <|> parseHex <|> parseOct <|> parseBin
+                 return $ num
+
+parseDigital1 :: Parser LispVal
+parseDigital1 = do x <- many1 digit
+                   (return . Number . read) x
+
+parseDigital2 :: Parser LispVal
+parseDigital2 = do try $ string "#d"
+                   x <- many1 digit
+                   (return . Number . read) x
+
+parseHex :: Parser LispVal
+parseHex = do try $ string "#x"
+              x <- many1 hexDigit
+              return $ Number (hex2dig x)
+
+parseOct :: Parser LispVal
+parseOct = do try $ string "#o"
+              x <- many1 octDigit
+              return $ Number (oct2dig x)
+
+parseBin :: Parser LispVal
+parseBin = do try $ string "#b"
+              x <- many1 (oneOf "10")
+              return $ Number (bin2dig x)
+
+oct2dig x = fst $ readOct x !! 0
+hex2dig x = fst $ readHex x !! 0
+bin2dig = bin2dig' 0
+bin2dig' digint "" = digint
+bin2dig' digint (x:xs) = let old = 2 * digint + (if x == '0' then 0 else 1) in bin2dig' old xs
 
 parseList :: Parser LispVal
 parseList = liftM List $ sepBy parseExpr spaces
@@ -88,6 +127,7 @@ parseExpr :: Parser LispVal
 parseExpr = parseAtom
         <|> parseString
         <|> parseNumber
+        <|> parseBool
         <|> parseQuoted
         <|> do char '('
                x <- (try parseList) <|> parseDottedList
