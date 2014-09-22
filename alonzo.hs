@@ -11,6 +11,9 @@ main :: IO ()
 main = do args <- getArgs
           if null args then runRepl else runOne $ args
 
+symbol :: Parser Char
+symbol = oneOf "!$%&|*+-/:<=?>@^_~#"
+
 readOrThrow :: Parser a -> String -> ThrowsError a
 readOrThrow parser input = case parse parser "lisp" input of
     Left err -> throwError $ Parser err
@@ -19,16 +22,17 @@ readOrThrow parser input = case parse parser "lisp" input of
 readExpr = readOrThrow parseExpr
 readExprList = readOrThrow (endBy parseExpr spaces)
 
-symbol :: Parser Char
-symbol = oneOf "!$%&|*+-/:<=?>@^_~#"
-
--- readExpr :: String -> ThrowsError LispVal
--- readExpr input = case parse parseExpr "lisp" input of
---    Left err -> throwError $ Parser err
---    Right val -> return val
+comments :: Parser ()
+comments =  do string ";;"
+               skipMany (noneOf "\r\n")
 
 spaces :: Parser ()
 spaces = skipMany1 space
+
+escapedChars :: Parser String
+escapedChars = do char '\\'
+                  x <- oneOf "\\\""
+                  return [x]
 
 data LispVal = Atom String
              | List [LispVal]
@@ -44,9 +48,9 @@ data LispVal = Atom String
 
 parseString :: Parser LispVal
 parseString = do char '"'
-                 x <- many (noneOf "\"")
+                 x <- many $ many1 (noneOf "\"\\") <|> escapedChars
                  char '"'
-                 return $ String x
+                 return $ String (concat x)
 
 parseAtom :: Parser LispVal
 parseAtom = do first <- letter <|> symbol
@@ -92,9 +96,9 @@ showVal (Number contents) = show contents
 showVal (Bool True) = "#t"
 showVal (Bool False) = "#f"
 showVal (List contents) = "(" ++ unwordsList contents ++ ")"
+showVal (DottedList head tail) = "(" ++ unwordsList head ++ "." ++ showVal tail ++ ")"
 showVal (Port _) = "<IO port>"
 showVal (IOFunc _) = "<IO primitive>"
-showVal (DottedList head tail) = "(" ++ unwordsList head ++ "." ++ showVal tail ++ ")"
 showVal (PrimitiveFunc _) = "<primitive>"
 showVal (Func {params = args, vararg = varargs, body = body, closure = env}) =
   "(lambda (" ++ unwords (map show args) ++
