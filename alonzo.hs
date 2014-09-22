@@ -31,8 +31,13 @@ spaces = skipMany1 space
 
 escapedChars :: Parser String
 escapedChars = do char '\\'
-                  x <- oneOf "\\\""
-                  return [x]
+                  x <- oneOf "\\\"ntr"
+                  case x of
+                    '\\' -> do return [x]
+                    '"' -> do return [x]
+                    't' -> do return "\t"
+                    'n' -> do return "\n"
+                    'r' -> do return "\r"
 
 data LispVal = Atom String
              | List [LispVal]
