@@ -46,11 +46,22 @@ data LispVal = Atom String
              | Number Integer
              | String String
              | Bool Bool
+             | Character Char
              | Port Handle
              | PrimitiveFunc ([LispVal] -> ThrowsError LispVal)
              | IOFunc ([LispVal] -> IOThrowsError LispVal)
              | Func {params :: [String], vararg :: (Maybe String),
                      body :: [LispVal], closure :: Env}
+
+parseChar :: Parser LispVal
+parseChar = do try $ string "#\\"
+               x <- parseCharName <|> anyChar
+               return $ Character x
+
+parseCharName = do x <- try (string "space" <|> string "newline")
+                   case x of
+                     "space" -> do return ' '
+                     "newline" -> do return '\n'
 
 parseString :: Parser LispVal
 parseString = do char '"'
@@ -126,8 +137,9 @@ parseQuoted = do
 parseExpr :: Parser LispVal
 parseExpr = parseAtom
         <|> parseString
-        <|> parseNumber
-        <|> parseBool
+        <|> try parseNumber
+        <|> try parseBool
+        <|> try parseChar
         <|> parseQuoted
         <|> do char '('
                x <- (try parseList) <|> parseDottedList
