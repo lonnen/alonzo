@@ -19,7 +19,7 @@ source-repository head
 executable alonzo
   default-language:    Haskell98
   default-extensions:  ExistentialQuantification
-  main-is:             alonzo.hs
+  main-is:             src/Main.hs
   -- other-modules:
   build-depends:       base   >=4.0 && < 5,
                        parsec ==3.1.3,

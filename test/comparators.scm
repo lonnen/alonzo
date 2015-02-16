@@ -1,0 +1,7 @@
+(string=? "test" "test")
+(string<=? "abc" "bba")
+(eqv? 2 2)
+(eq? 2 2)
+(eqv? 1 3)
+(eqv? 3 3)
+(eqv? 'atom 'atom)

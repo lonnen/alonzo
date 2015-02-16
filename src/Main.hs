@@ -24,7 +24,7 @@ readExpr = readOrThrow parseExpr
 readExprList = readOrThrow (endBy parseExpr spaces)
 
 comments :: Parser ()
-comments =  do string ";;"
+comments =  do char ';'
                skipMany (noneOf "\r\n")
 
 spaces :: Parser ()
@@ -52,6 +52,11 @@ data LispVal = Atom String
              | IOFunc ([LispVal] -> IOThrowsError LispVal)
              | Func {params :: [String], vararg :: (Maybe String),
                      body :: [LispVal], closure :: Env}
+
+parseComment :: Parser LispVal
+parseComment = do char ';'
+                  x <- many $ many1 (noneOf "\r\n")
+                  return $ String (concat x)
 
 parseChar :: Parser LispVal
 parseChar = do try $ string "#\\"
@@ -135,7 +140,8 @@ parseQuoted = do
     return $ List [Atom "quote", x]
 
 parseExpr :: Parser LispVal
-parseExpr = parseAtom
+parseExpr = parseComment
+        <|> parseAtom
         <|> parseString
         <|> try parseNumber
         <|> try parseBool
